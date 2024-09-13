@@ -96,48 +96,6 @@ return {
 		['Stake'] = {},
 		['Spectral'] = {},
 		['Edition'] = {},
-		['Perk'] = {
-			['perk_loyalty_prototype'] = {
-				['name'] = 'Prototype',
-				['text'] = {
-					'On {E:1,C:green}exploit{}:',
-					'create a {C:loyalty_temporary}temporary{} {C:attention}Blueprint{},',
-					'then {E:1,C:red}burn{}',
-				},
-			},
-			['perk_loyalty_dirty_napkin'] = {
-				['name'] = 'Dirty Napkin',
-				['text'] = {
-					'On {E:1,C:green}exploit{}:',
-					'create a {C:loyalty_temporary}temporary{} {C:attention}Brainstorm{},',
-					'then {E:1,C:red}burn{}',
-				},
-			},
-			['perk_loyalty_reward_card'] = {
-				['name'] = 'Reward Card',
-				['text'] = {
-					'On {E:1,C:green}exploit{}:',
-					'create a {C:attention}Coupon Tag{},',
-					'then {E:1,C:red}burn{}',
-				},
-			},
-			['perk_loyalty_business_card'] = {
-				['name'] = 'Business Card',
-				['text'] = {
-					'On {E:1,C:green}exploit{}:',
-					'create an {C:attention}Uncommon Tag{},',
-					'then {E:1,C:red}burn{}',
-				},
-			},
-			['perk_loyalty_plus_two'] = {
-				['name'] = '+2 Card',
-				['text'] = {
-					'On {E:1,C:green}exploit{}:',
-					'gain {C:attention}+#1#{} hand size,',
-					'then {E:1,C:red}burn{}',
-				},
-			},
-		},
 		['Other'] = {
 			['p_loyalty_perk_normal_1'] = {
 			    ['name'] = "Perk Pack",
@@ -216,6 +174,11 @@ return {
 					'{C:green,E:1}Perk{} card effects',
 				},
 			},
+			['perk_chips'] = {
+                ['text'] = {
+                    "{V:1}#2##1#{} chips"
+                }
+            },
 		},
 	},
 }

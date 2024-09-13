@@ -1,5 +1,12 @@
 -- HOOKS
 
+local gen_ui_ref = generate_card_ui
+function generate_card_ui(_c, full_UI_table, specific_vars, card_type, badges, hide_desc, main_start, main_end, card)
+    local ret = gen_ui_ref(_c, full_UI_table, specific_vars, card_type, badges, hide_desc, main_start, main_end, card)
+    print(tprint(ret))
+    return ret
+end
+
 local end_round_ref = end_round
 function end_round()
 	-- remove any temp jokers
@@ -34,6 +41,9 @@ function draw_card(from, to, percent, dir, sort, card, delay, mute, stay_flipped
             to = G.perks
             dir = 'up'
             sort = true
+        end
+        if to == G.discard and card.ability.set == 'Perk' and card.ability.calc then
+            card.ability.calc = false
         end
     end
     draw_card_ref(from, to, percent, dir, sort, card, delay, mute, stay_flipped, vol, discarded_only)

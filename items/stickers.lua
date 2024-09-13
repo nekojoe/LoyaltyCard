@@ -1,6 +1,6 @@
 -- atlas for stickers
 local loyalty_sticker_atlas = SMODS.Atlas{
-    key = 'loyalty_stickers',
+    key = 'stickers',
     path = 'stickers.png',
     px = 71,
     py = 95,

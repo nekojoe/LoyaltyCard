@@ -613,6 +613,55 @@ LoyaltyCard.FUNCS.create_buttons = function(args, back, save_func)
     return t
 end
 
+function loyalty_rank_from_rows(card)
+    local desc_nodes = {}
+    local chips = card.config.center.nominal_chips or 0
+    local t = {}
+    localize{type = 'other', key = 'perk_chips', nodes = desc_nodes, vars = {chips, (chips < 0 and '') or '+', colours = {(chips < 0 and G.C.RED) or G.C.BLUE}}}
+    for k, v in ipairs(desc_nodes) do
+        t[#t+1] = {n=G.UIT.R, config={align = "cm", maxw = maxw}, nodes=v}
+    end
+    return {n=G.UIT.R, config={align = "cm", colour = empty and G.C.CLEAR or G.C.UI.BACKGROUND_WHITE, r = 0.1, padding = 0.04, minw = 2, minh = 0.8, emboss = not empty and 0.05 or nil, filler = true}, nodes={
+        {n=G.UIT.R, config={align = "cm", padding = 0.03}, nodes=t}
+    }}
+end
+
+function loyalty_on_play_from_rows(card)
+    local key = card.config.center.key .. '_play'
+    local vars = card.config.center.loc_vars and card.config.center:loc_vars(card) or {}
+    local desc_nodes = {}
+    local t = {}
+    if G.localization.descriptions.Other[key] then
+        print('ben')
+        localize{type = 'other', key = key, nodes = desc_nodes, vars = vars}
+        for k, v in ipairs(desc_nodes) do
+            print(tostring('v'))
+            t[#t+1] = {n=G.UIT.R, config={align = "cm", maxw = maxw}, nodes=v}
+        end
+        return {n=G.UIT.R, config={align = "cm", colour = empty and G.C.CLEAR or G.C.UI.BACKGROUND_WHITE, r = 0.1, padding = 0.04, minw = 2, minh = 0.8, emboss = not empty and 0.05 or nil, filler = true}, nodes={
+            {n=G.UIT.R, config={align = "cm", padding = 0.03}, nodes=t}
+        }}
+    end
+    return nil
+end
+
+function loyalty_on_discard_from_rows(card)
+    local desc_nodes = {}
+    local key = card.config.center.loc_vars and card.config.center:loc_vars(card) or {}
+    local vars = card.config.center.loc_vars or {}
+    local t = {}
+    if G.localization.descriptions.Other[key]  then
+        localize{type = 'other', key = key, nodes = desc_nodes, vars = vars}
+        for k, v in ipairs(desc_nodes) do
+            t[#t+1] = {n=G.UIT.R, config={align = "cm", maxw = maxw}, nodes=v}
+        end
+        return {n=G.UIT.R, config={align = "cm", colour = empty and G.C.CLEAR or G.C.UI.BACKGROUND_WHITE, r = 0.1, padding = 0.04, minw = 2, minh = 0.8, emboss = not empty and 0.05 or nil, filler = true}, nodes={
+            {n=G.UIT.R, config={align = "cm", padding = 0.03}, nodes=t}
+        }}
+    end
+    return nil
+end
+
 -- HOOKS
 
 local create_UIBox_buttons_ref = create_UIBox_buttons

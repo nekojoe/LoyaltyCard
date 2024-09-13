@@ -4,6 +4,8 @@ SMODS.Perk = SMODS.Enhancement:extend {
 	set = 'Perk',
 	class_prefix = 'perk',
 	atlas = 'centers',
+    rarity = 1,
+    nominal_chips = 0,
 	pos = { x = 0, y = 0 },
 	required_params = {
 		'key',
@@ -11,10 +13,11 @@ SMODS.Perk = SMODS.Enhancement:extend {
 	replace_base_card = true,
 	always_scores = true,
 	no_suit = true,
-	no_rank = true,
+	--no_rank = true,
 
 	register = function(self)
 		self.config = self.config or {}
+        self.config.calc = false
 		-- default area to G.play
 		self.config.area = self.config.area or G.play
 		-- fill out any missing parts of ability table
@@ -44,28 +47,44 @@ SMODS.Perk = SMODS.Enhancement:extend {
 	end,
 
     generate_ui = function(self, info_queue, card, desc_nodes, specific_vars, full_UI_table)
-        info_queue[#info_queue+1] = {set = 'Other', key = 'loyalty_exploit'}
         if card.ability.shred then
             info_queue[#info_queue+1] = {set = 'Other', key = 'loyalty_shred'}
         elseif card.ability.burn then
             info_queue[#info_queue+1] = {set = 'Other', key = 'loyalty_burn'}
         end
-        SMODS.Enhancement.super.generate_ui(self, info_queue, card, desc_nodes, specific_vars, full_UI_table)
+
+        local res = {}
+        if self.loc_vars and type(self.loc_vars) == 'function' then
+            res = self:loc_vars(info_queue, card) or {}
+        end
+
+        if not full_UI_table.name then
+            full_UI_table.name = localize { type = 'name', set = self.set, key = self.key, nodes = full_UI_table.name }
+        end
+        if G.localization.descriptions.Other[self.key..'_play'] then
+            full_UI_table.main = localize{type = 'other', key = self.key..'_play', nodes = full_UI_table.main, vars = res.vars or {}}
+        end
+        if specific_vars and specific_vars.debuffed and not res.replace_debuff then
+            target = { type = 'other', key = 'debuffed_' ..
+            (specific_vars.playing_card and 'playing_card' or 'default'), nodes = desc_nodes }
+        end
     end,
 
     process_loc_text = function(self)
         G.localization.descriptions[self.set] = G.localization.descriptions[self.set] or {}
-        SMODS.process_loc_text(G.localization.descriptions[self.set], self.key, self.loc_txt)
+        process_perk_loc_text(self.key, self.loc_txt)
     end,
 
 	calculate = function(self, context, effect, card)
-		if (card and card.ability) and not (card.burnt or card.shredded) then
+		if (card and card.ability) and not (card.burnt or card.shredded or card.calc) then
 
             -- burn/shred any cards
             if card.ability.shred then
                 card.shredded = true
             elseif card.ability.burn then
                 card.burnt = true
+            else
+                card.calc = true
             end
             
             -- add any jokers
@@ -159,7 +178,60 @@ SMODS.Perk = SMODS.Enhancement:extend {
 	end,
 }
 
--- actual perk cards
+function process_perk_loc_text(ref_value, loc_txt)
+    if not loc_txt then return end
+    local ref_table1 = G.localization.descriptions.Other
+    local ref_table2 = G.localization.descriptions.Perk
+    if ref_table2[ref_value] or ref_table1[ref_value..'_play'] or ref_table1[ref_value..'_discard'] then return end
+    ref_table2[ref_value] = {}
+    ref_table2[ref_value].name = loc_txt.name
+    ref_table1[ref_value..'_play'] = {}
+    ref_table2[ref_value].text = loc_txt.play
+    ref_table1[ref_value..'_discard'] = {}
+    ref_table1[ref_value..'_discard'].text = loc_txt.discard
+end
+
+local loyalty_card_atlas = SMODS.Atlas{
+	key = 'loyalty_card',
+	path = 'loyalty_card.png',
+	px = 71,
+	py = 95,
+	atlas_table = 'ASSET_ATLAS',
+}
+
+local loyalty_card = SMODS.Perk{
+    key = 'loyalty_card',
+	atlas = 'loyalty_card',
+    pos = {
+        x = 0,
+        y = 0,
+    },
+    nominal_chips = -10,
+	config = {
+        stamps = 0,
+        message = 'Stamp!',
+        colour = G.C.GREEN,
+	},
+    loc_txt = {
+        name = 'Loyalty Card',
+        play = {
+            'On {C:blue}play{} and {C:blue}exploit{}:',
+            'gain {C:attention}+#1#{} Stamp ()',
+        },
+    },
+
+    loc_vars = function(self, info_queue, card)
+        return {vars = {card.ability.stamps}}
+    end,
+
+    calculate = function(self, context, effect, card)
+        -- if not card.calc then
+        --     card.calc = true
+        --     if card.ability.
+        --     card.ability.stamps = card.ability.stamps
+        -- end
+    end
+}
 
 local loyalty_perk_atlas = SMODS.Atlas{
 	key = 'perks',
@@ -169,110 +241,12 @@ local loyalty_perk_atlas = SMODS.Atlas{
 	atlas_table = 'ASSET_ATLAS',
 }
 
-local prototype = SMODS.Perk{
-    key = 'prototype',
-	atlas = 'perks',
-    pos = {
-        x = 2,
-        y = 1,
-    },
-    config = {
-        jokers = {
-            {
-                key = 'j_blueprint',
-                sticker = 'loyalty_temporary',
-                ignore_space = true,
-            },
-        },
-        burn = true,
-        message = 'Blueprint!',
-        colour = G.C.SECONDARY_SET.Spectral,
-	},
-
-    loc_vars = function(self, info_queue)
-        info_queue[#info_queue+1] = {set = 'Other', key = 'loyalty_temporary'}
-        info_queue[#info_queue+1] = G.P_CENTERS['j_blueprint']
-    end,
-}
-
-local dirty_napkin = SMODS.Perk{
-    key = 'dirty_napkin',
-	atlas = 'perks',
-    pos = {
-        x = 1,
-        y = 0,
-    },
-    config = {
-        jokers = {
-            {
-                key = 'j_brainstorm',
-                sticker = 'loyalty_temporary',
-                ignore_space = true,
-            },
-        },
-        burn = true,
-        message = 'Brainstorm!',
-        colour = G.C.RED,
-	},
-
-    loc_vars = function(self, info_queue)
-        info_queue[#info_queue+1] = {set = 'Other', key = 'loyalty_temporary'}
-        info_queue[#info_queue+1] = G.P_CENTERS['j_brainstorm']
-    end,
-}
-
-local reward_card = SMODS.Perk{
-	key = 'reward_card',
-	atlas = 'perks',
-	pos = {
-		x = 2,
-		y = 0,
-	},
-	config = {
-        tags = {
-            {
-                key = 'tag_coupon',
-            },
-        },
-        burn = true,
-		message = 'Tag!',
-		colour = G.C.GREEN,
-	},
-
-	loc_vars = function(self, info_queue)
-        info_queue[#info_queue+1] = G.P_TAGS['tag_coupon']
-    end,
-}
-
-local business_card = SMODS.Perk{
-    key = 'business_card',
-	atlas = 'perks',
-    pos = {
-        x = 3,
-        y = 0,
-    },
-	config = {
-        tags = {
-            {
-                key = 'tag_uncommon',
-            },
-        },
-        burn = true,
-		message = 'Tag!',
-		colour = G.C.GREEN,
-	},
-
-    loc_vars = function(self, info_queue)
-        info_queue[#info_queue+1] = G.P_TAGS['tag_uncommon']
-    end,
-}
-
 local plus_two = SMODS.Perk{
     key = 'plus_two',
 	atlas = 'perks',
     pos = {
-        x = 0,
-        y = 1,
+        x = 1,
+        y = 0,
     },
 	config = {
         hand_size = 2,
@@ -280,12 +254,19 @@ local plus_two = SMODS.Perk{
         message = '+2!',
         colour = G.C.RED,
 	},
+    loc_txt = {
+        name = '+2 Card',
+        play = {
+            'On {C:blue}play{} and {C:blue}exploit{}:',
+            'gain {C:attention}+#1#{} hand size',
+        },
+        discard = {
+            'On {C:red}discard{}:',
+            '{C:attention}burn{}',
+        },
+    },
 
     loc_vars = function(self, info_queue, card)
-		return {
-			vars = {
-				card.ability.hand_size,
-			},
-		}
+        return {vars = {card.ability.hand_size}}
     end,
 }

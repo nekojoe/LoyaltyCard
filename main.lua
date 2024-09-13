@@ -1,6 +1,6 @@
 --- STEAMODDED HEADER
 --- MOD_NAME: Loyalty Card
---- MOD_ID: loyalty
+--- MOD_ID: LoyaltyCard
 --- PREFIX: loyalty
 --- MOD_AUTHOR: [nekojoe, Luigicat11]
 --- MOD_DESCRIPTION: A Balatro x D&DG Content Mod
@@ -56,6 +56,7 @@ LoyaltyCard.ITEMS = {
         'perks',
         'stickers',
         'ui',
+        'boosters',
     },
 }
 

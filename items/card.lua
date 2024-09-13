@@ -29,8 +29,8 @@ end
 function Card:set_temporary(bool)
     self.ability.loyalty_temporary = bool or nil
     if self.ability.loyalty_temporary then
-        if not G.GAME.loyalty_card.jokers[self] then
-            table.insert(G.GAME.loyalty_card.jokers, self)
+        if not G.GAME.loyalty_card.cards[self] then
+            table.insert(G.GAME.loyalty_card.cards, self)
         end
     end
 end
@@ -96,7 +96,7 @@ local card_load_ref = Card.load
 function Card:load(cardTable, other_card)
     card_load_ref(self, cardTable, other_card)
     if self.ability.loyalty_temporary then
-        table.insert(G.GAME.loyalty_card.jokers, self)
+        table.insert(G.GAME.loyalty_card.cards, self)
     end
 end
 

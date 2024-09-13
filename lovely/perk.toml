@@ -152,3 +152,24 @@ position = "after"
 payload = '''G.GAME.current_round.advantage_left = G.GAME.round_resets.advantage
 G.GAME.current_round.health_left = G.GAME.round_resets.health'''
 match_indent = true
+
+# card popup
+
+[[patches]]
+[patches.pattern]
+target = 'functions/UI_definitions.lua'
+pattern = '''name_from_rows(AUT.name, is_playing_card and G.C.WHITE or nil),'''
+position = "after"
+payload = '''card.ability and card.ability.set == 'Perk' and loyalty_rank_from_rows(card) or nil,'''
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = 'functions/UI_definitions.lua'
+pattern = '''desc_from_rows(AUT.main),'''
+position = "after"
+payload = '''card.ability and card.ability.set == 'Perk' and loyalty_on_discard_from_rows(card) or nil,'''
+match_indent = true
+
+
+
